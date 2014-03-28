@@ -42,6 +42,36 @@ bool I2c::read(uint8_t& data)
     return true;
 }
 
+bool I2c::read(uint8_t* pData, uint32_t dataLength)
+{
+    if (!transmitStart(m_isRepeatedStart))
+    {
+        return false;
+    }
+
+    if (!transmitSlaR())
+    {
+        return false;
+    }
+
+    for (uint32_t i = 0; i < dataLength; ++i)
+    {
+        if (!receiveData(pData[i]))
+        {
+            return false;
+        }
+
+        // Ack data
+        transmit();
+    }
+
+    transmitStop();
+
+    m_isRepeatedStart = false;
+
+    return true;
+}
+
 bool I2c::readNoStop(uint8_t& data)
 {
     if (!transmitStart(m_isRepeatedStart))
@@ -66,7 +96,12 @@ bool I2c::readNoStop(uint8_t& data)
     return true;
 }
 
-bool I2c::write(uint8_t* pData, int dataLength)
+bool I2c::wrtie(uint8_t data)
+{
+    return write(&data, 1);
+}
+
+bool I2c::write(uint8_t* pData, uint32_t dataLength)
 {
     if (!writeNoStop(pData, dataLength))
     {
@@ -80,7 +115,12 @@ bool I2c::write(uint8_t* pData, int dataLength)
     return true;
 }
 
-bool I2c::writeNoStop(uint8_t* pData, int dataLength)
+bool I2c::writeNoStop(uint8_t data)
+{
+    return writeNoStop(&data, 1);
+}
+
+bool I2c::writeNoStop(uint8_t* pData, uint32_t dataLength)
 {
     if (!transmitStart(m_isRepeatedStart))
     {
@@ -92,7 +132,7 @@ bool I2c::writeNoStop(uint8_t* pData, int dataLength)
         return false;
     }
 
-    for (int i = 0; i < dataLength; ++i)
+    for (uint32_t i = 0; i < dataLength; ++i)
     {
         if (!transmitData(pData[i]))
         {
@@ -126,11 +166,11 @@ bool I2c::transmitStart(bool repeatedStart)
     {
         if (repeatedStart)
         {
-            error("Error transmitting START", getStatus());
+            error("Error transmitting REPEATED START", getStatus());
         }
         else
         {
-            error("Error transmitting REPEATED START", getStatus());
+            error("Error transmitting START", getStatus());
         }
         return false;
     }

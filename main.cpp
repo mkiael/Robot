@@ -4,10 +4,11 @@
 #include <Arduino.h>
 #include "i2c.h"
 #include "md25.h"
+#include "mpu9150.h"
 
 enum
 {
-    DELAY_MS = 20,
+    DELAY_MS = 200,
 };
 
 void appInit()
@@ -29,6 +30,7 @@ int main (void)
 
     Serial.println("Hello!");
 
+    /*
     Md25 md25;
 
     md25.setMode(OM_MODE0);
@@ -40,9 +42,33 @@ int main (void)
     int32_t encoderValue = 0;
 
     MotorDirection dirMotor = MD_FORWARD;
+    */
+
+    mpu::Mpu9150 mpu9150;
+
+    int16_t x, y, z;
+
+    if (!mpu9150.setClockSource(mpu::CS_GYRO_X_AXIS_REF)) Serial.println("Error setting clock source");
+    if (!mpu9150.setGyroFullScaleRange(mpu::GFSR_250)) Serial.println("Error setting gyro full scale range");
+    if (!mpu9150.setAccelFullScaleRange(mpu::AFSR_2g)) Serial.println("Error setting accel full scale range");
+    if (!mpu9150.setSleepEnabled(false)) Serial.println("Error disabling sleep");
 
     while(1)
     {
+        if (mpu9150.readAccel(x, y, z))
+        {
+            Serial.print("X: "); Serial.print(x); Serial.print("\n");
+            Serial.print("Y: "); Serial.print(y); Serial.print("\n");
+            Serial.print("Z: "); Serial.print(z); Serial.print("\n");
+        }
+        else
+        {
+            Serial.println("Error reading gyro");
+        }
+
+        _delay_ms(DELAY_MS);
+
+        /*
         md25.getEncoder(MI_MOTOR1, encoderValue);
 
         if (dirMotor == MD_FORWARD && encoderValue > 4000)
@@ -67,6 +93,7 @@ int main (void)
         }
 
         _delay_ms(DELAY_MS);
+        */
     }
 
     Serial.println("Bye!");

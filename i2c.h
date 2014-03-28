@@ -13,11 +13,17 @@ public:
 
     bool read(uint8_t& data);
 
+    bool read(uint8_t* pData, uint32_t dataLength);
+
     bool readNoStop(uint8_t& data);
 
-    bool write(uint8_t* pData, int dataLength);
+    bool wrtie(uint8_t data);
 
-    bool writeNoStop(uint8_t* pData, int dataLength);
+    bool write(uint8_t* pData, uint32_t dataLength);
+
+    bool writeNoStop(uint8_t data);
+
+    bool writeNoStop(uint8_t* pData, uint32_t dataLength);
 
 private:
 
