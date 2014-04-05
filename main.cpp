@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
-#include <util/twi.h>
 #include <Arduino.h>
+#include <Fastwire.h>
 #include "i2c.h"
 #include "md25.h"
 #include "mpu9150.h"
@@ -13,7 +13,9 @@ enum
 
 void appInit()
 {
-    I2c::init();
+    //I2c::init();
+
+    Fastwire::setup(100, true);
 
     Serial.begin(9600);
 }
@@ -44,9 +46,8 @@ int main (void)
     MotorDirection dirMotor = MD_FORWARD;
     */
 
-    mpu::Mpu9150 mpu9150;
 
-    int16_t x, y, z;
+    mpu::Mpu9150 mpu9150;
 
     if (!mpu9150.setClockSource(mpu::CS_GYRO_X_AXIS_REF)) Serial.println("Error setting clock source");
     if (!mpu9150.setGyroFullScaleRange(mpu::GFSR_250)) Serial.println("Error setting gyro full scale range");
@@ -55,16 +56,7 @@ int main (void)
 
     while(1)
     {
-        if (mpu9150.readAccel(x, y, z))
-        {
-            Serial.print("X: "); Serial.print(x); Serial.print("\n");
-            Serial.print("Y: "); Serial.print(y); Serial.print("\n");
-            Serial.print("Z: "); Serial.print(z); Serial.print("\n");
-        }
-        else
-        {
-            Serial.println("Error reading gyro");
-        }
+        mpu9150.update();
 
         _delay_ms(DELAY_MS);
 
